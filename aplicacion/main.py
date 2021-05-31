@@ -1,5 +1,6 @@
 import os
 import sys
+from threading import Thread
 from time import sleep
 
 from PyQt5 import QtWidgets
@@ -33,12 +34,8 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         # Modelos
         self.colorizer = get_image_colorizer(artistic=True)
 
-    def on_click_procesar(self):
-
+    def color_image(self):
         image_size = len(self.imgs)
-        self.btn_procesar.setDisabled(True)
-        self.btn_destino.setDisabled(True)
-        self.btn_carga.setDisabled(True)
         for index, image in enumerate(self.imgs):
             render_factor = 30
             path = Path(os.path.normpath(self.folder))
@@ -56,6 +53,15 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         self.btn_procesar.setDisabled(False)
         self.btn_destino.setDisabled(False)
         self.btn_carga.setDisabled(False)
+
+    def on_click_procesar(self):
+
+        self.btn_procesar.setDisabled(True)
+        self.btn_destino.setDisabled(True)
+        self.btn_carga.setDisabled(True)
+
+        thread = Thread(target=self.color_image)
+        thread.start()
 
     def on_click_load_files(self):
         options = QFileDialog.Options()
