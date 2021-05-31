@@ -1,0 +1,1 @@
+https://data.deepai.org/deoldify/ColorizeArtistic_gen.pth
