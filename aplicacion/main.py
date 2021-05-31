@@ -47,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
             # Actualizamos tabla
             self.tabla_procesado.insertRow(index)
             self.tabla_procesado.setItem(index, 0, QtWidgets.QTableWidgetItem(os.path.basename(image_path)))
-            self.tabla_procesado.setItem(index, 1, QtWidgets.QTableWidgetItem(image_path))
+            self.tabla_procesado.setItem(index, 1, QtWidgets.QTableWidgetItem(str(image_path)))
             self.tabla_procesado.model().layoutChanged.emit()
 
         self.btn_procesar.setDisabled(False)
