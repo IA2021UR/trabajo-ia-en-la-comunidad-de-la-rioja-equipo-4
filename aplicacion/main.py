@@ -13,6 +13,31 @@ from aplicacion.view import MainScreen
 
 from deoldify.visualize import get_image_colorizer
 
+
+class ColorThread(QtCore.QThread):
+    image = QtCore.pyqtSignal(str)
+    end = QtCore.pyqtSignal(list)
+
+    def __init__(self, images, colorizer, folder):
+        QtCore.QThread.__init__(self)
+        self.images = images
+        self.colorizer = colorizer
+        self.folder = folder
+
+    def run(self):
+        image_paths = []
+        for index, image in enumerate(self.images):
+            render_factor = 30
+            path = Path(os.path.normpath(self.folder))
+            image_path = self.colorizer.plot_transformed_image(path=image, render_factor=render_factor, compare=True,
+                                                               watermarked=False, results_dir=path)
+
+            self.image.emit(str(image_path))
+            image_paths.append(str(image_path))
+
+        self.end.emit(image_paths)
+
+
 class MainWindow(QtWidgets.QMainWindow, MainScreen):
     def __init__(self, *args, obj=None, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -34,24 +59,20 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         # Modelos
         self.colorizer = get_image_colorizer(artistic=True)
 
-    def color_image(self):
-        image_size = len(self.imgs)
-        for index, image in enumerate(self.imgs):
-            render_factor = 30
-            path = Path(os.path.normpath(self.folder))
-            image_path = self.colorizer.plot_transformed_image(path=image, render_factor=render_factor, compare=True,
-                                                               watermarked=False, results_dir=path)
+    def image_processed(self, image):
+        self.imgs_color.append(image)
+        self.progress_bar_tratamiento.setProperty("value", (100 * len(self.imgs_color)) / len(self.imgs))
 
-            # Actualizamos barra de progreso
-            self.progress_bar_tratamiento.setProperty("value", (100 * (index + 1)) / image_size)
-            # Actualizamos tabla
-            self.tabla_procesado.insertRow(index)
-            self.tabla_procesado.setItem(index, 0, QtWidgets.QTableWidgetItem(os.path.basename(image_path)))
-            self.tabla_procesado.setItem(index, 1, QtWidgets.QTableWidgetItem(str(image_path)))
-
+    def image_processed_end(self, paths):
         self.btn_procesar.setDisabled(False)
         self.btn_destino.setDisabled(False)
         self.btn_carga.setDisabled(False)
+
+        for index, image in enumerate(paths):
+            self.tabla_procesado.insertRow(index)
+            self.tabla_procesado.setItem(index, 0, QtWidgets.QTableWidgetItem(os.path.basename(image)))
+            self.tabla_procesado.setItem(index, 1, QtWidgets.QTableWidgetItem(str(image)))
+        sleep(0.5)
         self.tabla_procesado.model().layoutChanged.emit()
 
     def on_click_procesar(self):
@@ -60,13 +81,12 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         self.btn_destino.setDisabled(True)
         self.btn_carga.setDisabled(True)
 
-        self.thread = QThread()
-        self.thread.started.connect(self.color_image)
-        self.thread.finished.connect(self.thread.deleteLater)
-
-        self.thread.start()
-
-
+        thread = ColorThread(self.imgs, self.colorizer, self.folder)
+        thread.image.connect(self.image_processed)
+        thread.end.connect(self.image_processed_end)
+        sleep(1)
+        thread.start()
+        sleep(1)
 
     def on_click_load_files(self):
         options = QFileDialog.Options()

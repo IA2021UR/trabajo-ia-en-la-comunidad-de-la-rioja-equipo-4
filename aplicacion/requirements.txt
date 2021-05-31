@@ -7,3 +7,12 @@ pyqt5-tools==5.15.4.3.2
 python-dotenv==0.17.1
 qt5-applications==5.15.2.2.2
 qt5-tools==5.15.2.1.2
+fastai==1.0.51
+wandb
+tensorboardX==1.6
+ffmpeg
+ffmpeg-python==0.1.17
+youtube-dl>=2019.4.17
+jupyterlab
+opencv-python>=3.3.0.10
+pillow==8.1.1
