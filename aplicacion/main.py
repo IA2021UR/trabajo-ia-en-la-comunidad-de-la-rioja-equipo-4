@@ -5,6 +5,7 @@ from time import sleep
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QDialog
 from PyQt5 import QtCore
+from pathlib import Path
 
 from aplicacion.view import MainScreen
 
@@ -40,8 +41,9 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         self.btn_carga.setDisabled(True)
         for index, image in enumerate(self.imgs):
             render_factor = 30
+            path = Path(os.path.normpath(self.folder))
             image_path = self.colorizer.plot_transformed_image(path=image, render_factor=render_factor, compare=True,
-                                                               watermarked=False, results_dir=self.folder)
+                                                               watermarked=False, results_dir=path)
 
             # Actualizamos barra de progreso
             self.progress_bar_tratamiento.setProperty("value", (100 * (index + 1)) / image_size)
