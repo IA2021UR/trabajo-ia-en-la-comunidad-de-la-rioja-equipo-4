@@ -4,6 +4,7 @@ from threading import Thread
 from time import sleep
 
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QFileDialog, QDialog
 from PyQt5 import QtCore
 from pathlib import Path
@@ -11,7 +12,6 @@ from pathlib import Path
 from aplicacion.view import MainScreen
 
 from deoldify.visualize import get_image_colorizer
-
 
 class MainWindow(QtWidgets.QMainWindow, MainScreen):
     def __init__(self, *args, obj=None, **kwargs):
@@ -48,11 +48,11 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
             self.tabla_procesado.insertRow(index)
             self.tabla_procesado.setItem(index, 0, QtWidgets.QTableWidgetItem(os.path.basename(image_path)))
             self.tabla_procesado.setItem(index, 1, QtWidgets.QTableWidgetItem(str(image_path)))
-            self.tabla_procesado.model().layoutChanged.emit()
 
         self.btn_procesar.setDisabled(False)
         self.btn_destino.setDisabled(False)
         self.btn_carga.setDisabled(False)
+        self.tabla_procesado.model().layoutChanged.emit()
 
     def on_click_procesar(self):
 
@@ -60,8 +60,13 @@ class MainWindow(QtWidgets.QMainWindow, MainScreen):
         self.btn_destino.setDisabled(True)
         self.btn_carga.setDisabled(True)
 
-        thread = Thread(target=self.color_image)
-        thread.start()
+        self.thread = QThread()
+        self.thread.started.connect(self.color_image)
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.thread.start()
+
+
 
     def on_click_load_files(self):
         options = QFileDialog.Options()
