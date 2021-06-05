@@ -1,0 +1,9 @@
+Informe: 
+Calidad del trabajo base buena.
+Ampliaciones:
+- Comparativa de distintos algoritmos.
+- Aplicación.
+- Distintos tipos de modelos.
+Calidad de la presentación muy buena.
+Nota sobre 10: 10
+Nota: 2.5
